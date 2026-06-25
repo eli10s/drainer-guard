@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Drainer Guard — Deteksi Situs Solana Drainer",
+  "name": "Drainer Guard — Multi-Chain Wallet Drainer Detector",
   "version": "1.0.0",
-  "description": "Mendeteksi otomatis situs crypto drainer di Solana, EVM (Ethereum/BSC/Polygon), TON, dan chain lainnya sebelum kamu kehilangan aset.",
+  "description": "Automatically detects crypto wallet drainer sites across Solana, EVM (Ethereum/BSC/Polygon), TON, and more chains before you lose your assets.",
   "permissions": ["storage", "scripting", "activeTab", "notifications"],
   "host_permissions": ["<all_urls>"],
   "action": {

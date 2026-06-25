@@ -1,65 +1,69 @@
 # 🛡️ Drainer Guard
 
-**Multi-chain browser extension** yang mendeteksi otomatis situs crypto wallet drainer sebelum kamu kehilangan aset.
+**Multi-chain browser extension** that automatically detects crypto wallet drainer sites before you lose your assets.
 
-## 🔍 Fitur
+## 🔍 Features
 
-| Fitur | Detail |
-|-------|--------|
+| Feature | Detail |
+|---------|--------|
 | **Solana** 🟣 | Phantom approve, Token-2022, Helius RPC key leak |
 | **EVM** 🔷 | MetaMask ERC-20 Approve, setApprovalForAll, Permit |
 | **TON** 💎 | Tonkeeper sendTransaction, TonConnect |
-| **Real-time** ⚡ | Intercept panggilan wallet sebelum tx dikirim |
-| **Auto-scan** | Scan otomatis tiap halaman + re-scan tiap 3 detik |
-| **Popup warning** | Tampilkan semua temuan dengan severity level |
+| **Real-time** ⚡ | Intercept wallet calls before tx is sent |
+| **Auto-scan** | Scans every page automatically + re-scans every 3s |
+| **Notifications** 🔔 | Chrome notification when a drainer is detected — no intrusive page overlays |
+| **Popup** | View all findings with severity levels |
 
-## 🔧 Cara Install (Developer Mode)
+## 🔧 Installation (Developer Mode)
 
-1. Download / clone repo ini
-2. Buka **chrome://extensions**
-3. Aktifkan **Developer Mode** (pojok kanan atas)
-4. Klik **Load unpacked**
-5. Pilih folder `drainer-guard/`
-6. ✅ Selesai — icon akan muncul di toolbar
+1. Download / clone this repo
+2. Open **chrome://extensions**
+3. Enable **Developer Mode** (top-right corner)
+4. Click **Load unpacked**
+5. Select the `drainer-guard/` folder
+6. ✅ Done — icon will appear in your toolbar
 
-## 📸 Screenshot
+## 📸 Screenshots
 
-*(tambahkan screenshot popup di sini)*
+*(add your screenshots here)*
 
-## 🧪 Cara Test
+## 🧪 How to Test
 
-1. Buka https://solgame.pw — akan terdeteksi sebagai **CRITICAL** drainer
-2. Klik icon extension — lihat daftar temuan
-3. Warna merah = Critical, oranye = High, kuning = Medium
+1. Visit https://solgame.pw — it will be detected as **CRITICAL** drainer
+2. Click the extension icon — see the list of findings
+3. Red = Critical, Orange = High, Blue = Medium
 
-## ⚙️ Cara Kerja
+## ⚙️ How It Works
 
-Extension membaca **frontend web** di browser kamu melalui 3 lapisan deteksi:
+The extension reads **frontend web content** in your browser through 3 detection layers:
 
-1. **Static scan** — scan HTML, JS, title, tombol, form saat halaman dimuat
-2. **DOM monitoring** — re-scan tiap 3 detik untuk konten dinamis
-3. **Runtime hooking** — intercept panggilan wallet (fetch, signAndSendTransaction, ethereum.request)
+1. **Static scan** — scans HTML, JS, title, buttons, forms on page load
+2. **DOM monitoring** — re-scans every 3 seconds for dynamically loaded content
+3. **Runtime hooking** — intercepts wallet API calls (fetch, signAndSendTransaction, ethereum.request) in real-time
 
-Semua **client-side**, tidak ada data dikirim ke server.
+All **client-side**, no data is sent to any server.
 
-## 📁 Struktur
+> ⚡ **CSP Safe**: Runtime hook script is loaded via `chrome.runtime.getURL('injected.js')` (not inline script), so it bypasses page Content Security Policy restrictions.
+
+## 📁 Structure
 
 ```
 drainer-guard/
 ├── manifest.json        # Chrome Extension Manifest V3
-├── content.js           # Content script — deteksi drainer
+├── content.js           # Content script — drainer detection
+├── injected.js          # Runtime hook — injected into page (CSP-safe)
 ├── background.js        # Service worker
 ├── popup.html           # Popup UI
 ├── popup.js             # Popup logic
-└── icons/               # Icon extension
+└── icons/               # Extension icons
 ```
 
-## 🛡️ Deteksi Berdasarkan Chain
+## 🛡️ Detection by Chain
 
 ### Solana
-- Token approve ke address mencurigakan
+- Token approve to suspicious addresses
 - Token-2022 (TokenzQdBNb) approve
-- Helius/Alchemy RPC key leak di frontend
+- Helius/Alchemy RPC key leak in frontend
 
 ### EVM (Ethereum, BSC, Polygon, Arbitrum, Base)
 - ERC-20 Approve unlimited (0x095ea7b3)
@@ -67,14 +71,14 @@ drainer-guard/
 - Permit / Permit2 (0xd505accf)
 
 ### TON
-- sendTransaction ke domain mencurigakan
+- sendTransaction to suspicious domains
 
 ### Generic
-- "Claim Airdrop" + "Connect Wallet" — pola scam klasik
-- API endpoint drainer (plan.php, telemetry.php, /claim.php)
-- maxUint256 / type(uint256).max — unlimited approve
-- WebSocket ke domain tidak dikenal
+- "Claim Airdrop" + "Connect Wallet" — classic scam pattern
+- API drainer endpoints (plan.php, telemetry.php, /claim.php)
+- maxUint256 / type(uint256).max — unlimited approval
+- WebSocket connections to unknown domains
 
-## 📝 Lisensi
+## 📝 MIT License
 
-MIT — bebas dipakai, dimodifikasi, dan didistribusikan.
+Free to use, modify, and distribute. Attribution required.

@@ -38,11 +38,11 @@ function render() {
       container.innerHTML = `
         <div class="empty">
           <div class="big">🛡️</div>
-          <div>Tidak ada drainer terdeteksi</div>
-          <div style="font-size:11px;margin-top:4px;">Semua situs aman sejauh ini</div>
+          <div>No drainer detected</div>
+          <div style="font-size:11px;margin-top:4px;">All sites safe so far</div>
         </div>
       `;
-      lastScanEl.textContent = 'Aman ✅';
+      lastScanEl.textContent = 'All Clear ✅';
       return;
     }
 
@@ -79,7 +79,7 @@ document.getElementById('clear-btn').addEventListener('click', () => {
   });
 });
 
-// Listen for updates dari content script
+// Listen for updates from content script
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.action === 'finding' || msg.action === 'alert') {
     render();

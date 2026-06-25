@@ -1,16 +1,16 @@
 // ============================================================
 // Drainer Guard — Content Script
-// Mendeteksi pola wallet drainer MULTI-CHAIN (Solana, EVM, TON, dll)
+// Detects wallet drainer patterns across MULTI-CHAIN (Solana, EVM, TON, etc.)
 // ============================================================
 
 (async function() {
-  // ─── Konfigurasi ───────────────────────────────────────────
+  // ─── Configuration ──────────────────────────────────────────
   const KNOWN_DRAINER_WALLETS = {
     solana: [
       'GK4Note9oHQY84JEtBFBRb6rBS8mSqryFQffdrWv67cR',
     ],
     evm: [
-      // Known EVM drainer addresses (bisa ditambah dari database publik)
+      // Add known EVM drainer addresses here (from public databases)
     ],
     ton: [],
     sui: [],
@@ -28,7 +28,7 @@
     '/api/claim/check',
   ];
 
-  // Pattern kode drainer — multi-chain
+  // Drainer code patterns — multi-chain
   const SUSPICIOUS_JS_PATTERNS = [
     // Solana
     'minimum_lamports',
@@ -63,7 +63,7 @@
     'quicknode.*endpoint',
   ];
 
-  // Regex untuk detect API keys
+  // Regex patterns for RPC API key detection
   const API_KEY_REGEXES = {
     helius: /([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/gi,
     alchemy: /alchemy_[a-zA-Z0-9]{32,}/gi,
@@ -103,16 +103,16 @@
     if (typeof window.aptos !== 'undefined') chains.push('aptos');
     if (typeof window.keplr !== 'undefined') chains.push('cosmos');
 
-    return [...new Set(chains)]; // unique
+    return [...new Set(chains)];
   }
 
-  // ─── Deteksi ───────────────────────────────────────────────
+  // ─── Detection ──────────────────────────────────────────────
 
-  // 1. Scan page HTML untuk indikator drainer
+  // 1. Scan page HTML for drainer indicators
   function scanPage() {
     const html = document.documentElement.outerHTML.toLowerCase();
 
-    // Cek known drainer wallet addresses (all chains)
+    // Check known drainer wallet addresses (all chains)
     for (const chain of Object.keys(KNOWN_DRAINER_WALLETS)) {
       for (const wallet of KNOWN_DRAINER_WALLETS[chain]) {
         if (html.includes(wallet.toLowerCase())) {
@@ -121,14 +121,14 @@
       }
     }
 
-    // Cek known path/endpoint
+    // Check known drainer paths/endpoints
     for (const path of KNOWN_DRAINER_PATHS) {
       if (html.includes(path)) {
         addFinding('path', `Drainer endpoint: ${path}`, 'high');
       }
     }
 
-    // Cek API keys (Helius, Alchemy, Moralis, Infura, QuickNode)
+    // Check exposed API keys (Helius, Alchemy, Moralis, Infura, QuickNode)
     for (const [provider, regex] of Object.entries(API_KEY_REGEXES)) {
       const matches = html.match(regex);
       if (matches) {
@@ -138,28 +138,28 @@
       }
     }
 
-    // Cek chain apa yang ditarget
+    // Detect which chains are being targeted
     const chains = detectChain();
     if (chains.length > 0) {
       addFinding('chain', `Target chain(s): ${chains.join(', ')}`, 'info');
     }
 
-    // Cek title/slogan — generic claim + wallet button = red flag
+    // Check title + wallet button — classic drainer pattern
     const title = document.title.toLowerCase();
     const claimKeywords = ['claim', 'airdrop', 'reward', 'bonus', 'free', 'giveaway', 'mint', 'withdraw'];
     const hasClaimKW = claimKeywords.some(kw => title.includes(kw));
     const hasWalletBtn = !!document.querySelector('[class*="wallet"], [id*="wallet"], [class*="connect"], [class*="login"]');
     if (hasClaimKW && hasWalletBtn) {
-      addFinding('social', `"${document.title}" + wallet button — klasik drainer pattern`, 'high');
+      addFinding('social', `"${document.title}" + wallet button — classic drainer pattern`, 'high');
     }
 
-    // Cek EVM-specific: ERC-20 approve selector di page
+    // EVM-specific: ERC-20 approve selectors in page
     if (html.includes('095ea7b3') || html.includes('a22cb465') || html.includes('d505accf')) {
-      addFinding('evm', 'EVM approve/setApprovalForAll selector terdeteksi — potensi token drain', 'critical');
+      addFinding('evm', 'EVM approve/setApprovalForAll selector detected — potential token drain', 'critical');
     }
   }
 
-  // 2. Monitor DOM untuk elemen mencurigakan
+  // 2. Monitor DOM for suspicious elements
   function scanDOM() {
     // Scan all inline scripts
     const scripts = document.querySelectorAll('script');
@@ -173,19 +173,19 @@
       }
     }
 
-    // Cek hidden inputs / fake claim forms
+    // Check hidden inputs / fake claim forms
     const forms = document.querySelectorAll('form');
     for (const form of forms) {
       const formHTML = form.innerHTML.toLowerCase();
       if ((formHTML.includes('claim') || formHTML.includes('approve') || formHTML.includes('sign')) && formHTML.includes('wallet')) {
-        addFinding('form', 'Claim/Approve form + wallet — potensi drain', 'high');
+        addFinding('form', 'Claim/Approve form + wallet — potential drain', 'high');
       }
     }
 
-    // Cek multiple wallet buttons (common in drainers pretending to be dapps)
+    // Check for multiple wallet buttons (common in drainers pretending to be dapps)
     const walletBtns = document.querySelectorAll('[class*="wallet"], [id*="wallet-connect"], [class*="connect-wallet"]');
     if (walletBtns.length > 3) {
-      addFinding('ui', `${walletBtns.length} wallet buttons — suspicious (drainer often has many)`, 'medium');
+      addFinding('ui', `${walletBtns.length} wallet buttons — suspicious (drainers often have many)`, 'medium');
     }
   }
 
@@ -197,43 +197,43 @@
     document.documentElement.appendChild(script);
   }
 
-  // 4. Listen for postMessage dari injected script — MULTI CHAIN
+  // 4. Listen for postMessage from injected script — MULTI CHAIN
   window.addEventListener('message', function(event) {
     if (event.data && event.data.type === '__DRAINER_GUARD__') {
       const d = event.data.detail;
 
       if (d.type === 'fetch') {
         if (d.url.includes('plan.php')) addFinding('runtime', `Fetch drainer API: ${d.url}`, 'critical');
-        else if (d.url.includes('telemetry.php')) addFinding('runtime', `Kirim telemetry ke drainer server`, 'critical');
-        else addFinding('runtime', `Fetch endpoint mencurigakan: ${d.url}`, 'high');
+        else if (d.url.includes('telemetry.php')) addFinding('runtime', `Sending telemetry to drainer server`, 'critical');
+        else addFinding('runtime', `Suspicious endpoint fetch: ${d.url}`, 'high');
       }
 
       if (d.type === 'approve_tx') {
         const chain = d.chain || 'unknown';
         const method = d.method || 'approve';
-        addFinding('approve', `[${chain.toUpperCase()}] ${method} terdeteksi! Program: ${d.program || d.to || '?'}`, 'critical');
+        addFinding('approve', `[${chain.toUpperCase()}] ${method} detected! Program: ${d.program || d.to || '?'}`, 'critical');
       }
 
       if (d.type === 'approve_check') {
-        addFinding('approve', `[${d.chain.toUpperCase()}] Drainer mengecek allowance token anda`, 'high');
+        addFinding('approve', `[${d.chain.toUpperCase()}] Drainer checking your token allowance`, 'high');
       }
 
       if (d.type === 'tx_request') {
-        addFinding('runtime', `[${d.chain.toUpperCase()}] Minta tanda tangan transaksi via ${d.provider}`, 'critical');
+        addFinding('runtime', `[${d.chain.toUpperCase()}] Requesting transaction signature via ${d.provider}`, 'critical');
       }
     }
   });
 
-  // ─── Eksekusi ──────────────────────────────────────────────
+  // ─── Execute ───────────────────────────────────────────────
 
-  // Tunggu page selesai load
+  // Wait for page load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         scanPage();
         scanDOM();
         injectWalletMonitor();
-        showWarningIfNeeded();
+        sendNotificationIfNeeded();
       }, 1000);
     });
   } else {
@@ -241,48 +241,32 @@
       scanPage();
       scanDOM();
       injectWalletMonitor();
-      showWarningIfNeeded();
+      sendNotificationIfNeeded();
     }, 1000);
   }
 
   // Re-scan periodically for dynamic content
   setInterval(scanDOM, 3000);
 
-  // ─── UI Warning ────────────────────────────────────────────
-  function showWarningIfNeeded() {
+  // ─── Notification (no page overlay) ────────────────────────
+  function sendNotificationIfNeeded() {
     const critical = findings.filter(f => f.severity === 'critical' || f.severity === 'high');
     if (critical.length === 0) return;
     if (alreadyNotified) return;
     alreadyNotified = true;
 
-    const overlay = document.createElement('div');
-    overlay.id = 'drainer-guard-overlay';
-    overlay.innerHTML = `
-      <div style="position:fixed;top:0;left:0;right:0;z-index:9999999;background:#dc2626;color:white;padding:12px 20px;font-family:Arial,sans-serif;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <strong>⚠️ DRAINER GUARD</strong> — Situs ini terdeteksi berbahaya!
-          <span style="display:block;font-size:12px;margin-top:2px;opacity:0.9;">
-            ${critical.map(f => `🔴 ${f.detail}`).join('<br>')}
-          </span>
-        </div>
-        <button id="drainer-guard-close" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:white;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;white-space:nowrap;margin-left:12px;">Tutup</button>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    document.getElementById('drainer-guard-close').onclick = () => overlay.remove();
-
-    // Kirim notifikasi
+    // Chrome notification only — no intrusive overlay on the page
     chrome.runtime.sendMessage({
       action: 'alert',
       alert: {
-        title: '⚠️ Situs Drainer Terdeteksi!',
-        message: `Ditemukan ${critical.length} indikasi drainer di ${location.hostname}`,
+        title: '⚠️ Drainer Site Detected!',
+        message: `Found ${critical.length} drainer indicators on ${location.hostname}`,
         findings: critical
       }
     });
   }
 
-  // ─── Kirim hasil ke popup via storage ──────────────────────
+  // ─── Send results to popup via storage ─────────────────────
   chrome.storage.local.set({
     ['scan_' + location.hostname]: {
       findings,
@@ -291,5 +275,5 @@
     }
   });
 
-  console.log('[Drainer Guard] Scan selesai:', findings.length, 'finding(s)');
+  console.log('[Drainer Guard] Scan complete:', findings.length, 'finding(s)');
 })();
