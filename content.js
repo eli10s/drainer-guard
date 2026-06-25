@@ -262,22 +262,37 @@
   // Re-scan periodically for dynamic content
   setInterval(scanDOM, 3000);
 
-  // ─── Notification (no page overlay) ────────────────────────
+  // ─── In-page toast notification ────────────────────────────
+  function showInPageToast(title, message, severity) {
+    const toast = document.createElement('div');
+    const colors = { critical: '#e74c3c', high: '#e67e22', medium: '#f39c12', info: '#3498db' };
+    const bg = colors[severity] || '#e74c3c';
+
+    toast.style.cssText = `
+      position: fixed; top: 12px; right: 12px; z-index: 2147483647;
+      max-width: 380px; padding: 14px 18px; border-radius: 10px;
+      background: ${bg}; color: #fff; font: 14px/1.4 -apple-system, sans-serif;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      cursor: pointer; transition: opacity 0.3s;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    `;
+    toast.innerHTML = `<strong>${title}</strong><br>${message}`;
+    toast.onclick = () => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); };
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 6000);
+  }
+
   function sendNotificationIfNeeded() {
     const critical = findings.filter(f => f.severity === 'critical' || f.severity === 'high');
     if (critical.length === 0) return;
     if (alreadyNotified) return;
     alreadyNotified = true;
 
-    // Chrome notification only — no intrusive overlay on the page
-    chrome.runtime.sendMessage({
-      action: 'alert',
-      alert: {
-        title: '⚠️ Drainer Site Detected!',
-        message: `Found ${critical.length} drainer indicators on ${location.hostname}`,
-        findings: critical
-      }
-    });
+    showInPageToast(
+      '⚠️ Drainer Site Detected!',
+      `${critical.length} drainer indicators found on ${location.hostname}. Click to dismiss.`,
+      'critical'
+    );
   }
 
   // ─── Send results to popup via storage ─────────────────────
