@@ -4,6 +4,20 @@
 // ============================================================
 
 (async function() {
+  // ─── Self-check: skip if this is our own repo or extension page ──
+  const SELF_URLS = [
+    'github.com/eli10s/drainer-guard',
+    'chrome.google.com/webstore',
+    'chrome://extensions',
+  ];
+  const currentUrl = location.href.toLowerCase();
+  for (const skip of SELF_URLS) {
+    if (currentUrl.includes(skip)) {
+      console.log('[Drainer Guard] Skipping own repo/page');
+      return;
+    }
+  }
+
   // ─── Configuration ──────────────────────────────────────────
   const KNOWN_DRAINER_WALLETS = {
     solana: [
