@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 420px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 13px;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      padding: 16px;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header .logo {
+      width: 32px; height: 32px;
+      background: #dc2626;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+    }
+    .header h1 { font-size: 16px; }
+    .header .sub { font-size: 11px; color: #94a3b8; }
+    .stats {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+    .stat-box {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      border-radius: 6px;
+      background: #0f172a;
+    }
+    .stat-box .num { font-size: 20px; font-weight: bold; }
+    .stat-box .label { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+    .stat-box.danger .num { color: #ef4444; }
+    .stat-box.warn .num { color: #f59e0b; }
+    .stat-box.safe .num { color: #22c55e; }
+    .stat-box.info .num { color: #6366f1; }
+    .finding-sev-info { border-left: 3px solid #6366f1; }
+    .findings { padding: 8px 0; max-height: 300px; overflow-y: auto; }
+    .finding {
+      padding: 10px 16px;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .finding .icon { font-size: 16px; margin-top: 1px; }
+    .finding .body { flex: 1; }
+    .finding .body .detail { color: #cbd5e1; word-break: break-all; font-size: 12px; }
+    .finding .body .url { color: #64748b; font-size: 11px; margin-top: 2px; }
+    .finding .sev-critical { border-left: 3px solid #ef4444; }
+    .finding .sev-high { border-left: 3px solid #f59e0b; }
+    .finding .sev-medium { border-left: 3px solid #3b82f6; }
+    .empty {
+      padding: 30px;
+      text-align: center;
+      color: #64748b;
+    }
+    .empty .big { font-size: 40px; margin-bottom: 8px; }
+    .footer {
+      padding: 10px 16px;
+      border-top: 1px solid #334155;
+      font-size: 11px;
+      color: #64748b;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+    .badge-critical { background: #ef4444; color: white; }
+    .badge-high { background: #f59e0b; color: #0f172a; }
+    .badge-medium { background: #3b82f6; color: white; }
+    .badge-info { background: #6366f1; color: white; }
+    .btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      background: #334155;
+      color: #e2e8f0;
+    }
+    .btn:hover { background: #475569; }
+    .btn-danger { background: #dc2626; }
+    .btn-danger:hover { background: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">DG</div>
+    <div>
+      <h1>Drainer Guard</h1>
+      <div class="sub">Multi-Chain | Solana · EVM · TON · dll</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-box danger">
+      <div class="num" id="critical-count">0</div>
+      <div class="label">CRITICAL</div>
+    </div>
+    <div class="stat-box warn">
+      <div class="num" id="high-count">0</div>
+      <div class="label">HIGH</div>
+    </div>
+    <div class="stat-box safe">
+      <div class="num" id="medium-count">0</div>
+      <div class="label">MEDIUM</div>
+    <div class="stat-box info">
+      <div class="num" id="info-count">0</div>
+      <div class="label">INFO</div>
+    </div>
+  </div>
+
+  <div id="findings-container" class="findings"></div>
+  <div class="footer">
+    <button id="clear-btn" class="btn">Hapus Semua</button>
+    &nbsp;
+    <span id="last-scan">Belum ada scan</span>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
