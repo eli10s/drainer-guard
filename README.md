@@ -27,12 +27,6 @@
 
 *(add your screenshots here)*
 
-## 🧪 How to Test
-
-1. Visit https://solgame.pw — it will be detected as **CRITICAL** drainer
-2. Click the extension icon — see the list of findings
-3. Red = Critical, Orange = High, Blue = Medium
-
 ## ⚙️ How It Works
 
 The extension reads **frontend web content** in your browser through 3 detection layers:
